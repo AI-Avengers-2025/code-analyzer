@@ -1,0 +1,119 @@
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+header {
+  background: #24292e;
+  color: white;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.repo-input {
+  margin-top: 0.5rem;
+}
+
+.repo-input input {
+  padding: 0.5rem;
+  width: 400px;
+  border-radius: 6px;
+  border: none;
+}
+
+.repo-input button {
+  padding: 0.5rem 1rem;
+  margin-left: 0.5rem;
+  border: none;
+  border-radius: 6px;
+  background: #2da44e;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 20% 50% 30%;
+  overflow: hidden;
+}
+
+section {
+  border-right: 1px solid #ddd;
+  padding: 1rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.explorer ul {
+  list-style: none;
+  padding: 0;
+}
+
+.explorer li {
+  padding: 0.5rem;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.explorer li:hover {
+  background: #f6f8fa;
+}
+
+.viewer pre {
+  background: #f6f8fa;
+  padding: 1rem;
+  border-radius: 6px;
+  height: 60vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  white-space: pre-wrap;
+}
+
+.analysis {
+  background: #f9fafc;
+}
+
+ul.nested {
+  list-style: none;
+  padding-left: 20px;
+}
+
+ul.nested.hidden {
+  display: none;
+}
+
+#toastContainer {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+}
+
+.toast {
+  background: gray;
+  color: #fff;
+  padding: 0.8rem 1rem;
+  margin-top: 0.5rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  min-width: 200px;
+  text-align: center;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+

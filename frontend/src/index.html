@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>code-analyzer</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header>
+    <h1>GitHub Repository Explorer</h1>
+    <div class="repo-input">
+      <input type="text" id="repoUrl" placeholder="Paste GitHub repo URL here...">
+      <button id="loadRepoBtn">Load Repository</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="explorer">
+      <h2>Repository Files</h2> 
+      <ul id="fileList">
+      </ul>
+    </section>
+
+    <section class="viewer">
+      <h2>File Viewer</h2>
+      <pre id="fileContent">// Select a file to view its contents</pre>
+    </section>
+
+    <section class="analysis">
+      <h2>Code Analysis</h2>
+      <div id="analysisResults">
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="js/main.js"></script>
+
+  <div id="toastContainer"></div>
+
+</body>
+</html>
