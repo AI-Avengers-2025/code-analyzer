@@ -1,5 +1,3 @@
-import path from 'path';
-
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -64,7 +62,7 @@ function prepareGeminiPayload({ filePath = '', fileContent = '', language = 'aut
     chars: fileContent.length,
   };
   const parts = [];
-  parts.push('Produce a single JSON object (no explanatory text) describing the file and its symbols.');
+  parts.push('Produce a single JSON object (no explanatory text) describing the file and its symbols. do not append a json indicator to the output. it should be parsable as JSON.');
   parts.push('Top-level requirements:');
   parts.push('- Provide a file-level summary: purpose, inferred language, and shortDescription (1-2 sentences).');
   parts.push("- Provide a longer fileAnalysis explaining responsibilities, important functions/classes, patterns, and any surprising or risky code.");
@@ -119,6 +117,7 @@ async function analyzeFile(req, res) {
       });
       const text = response?.text || (Array.isArray(response?.candidates) && response.candidates[0]?.content) || JSON.stringify(response);
       function extractJsonFromText(s) {
+        console.log('Raw Gemini response text:', s.slice(0, 500));
         if (!s || typeof s !== 'string') return { json: null, error: 'no text' };
         const fenceMatch = s.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
         let candidate = fenceMatch ? fenceMatch[1].trim() : s.trim();
