@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>code-analyzer</title>
-  <link rel="stylesheet" href="css/styles.css">
+  <title>Repo Analyzer</title>
+  <link rel="stylesheet" href="./css/styles.css">
 </head>
 <body>
   <header>
@@ -11,31 +11,23 @@
     <div class="repo-input">
       <input type="text" id="repoUrl" placeholder="Paste GitHub repo URL here...">
       <button id="loadRepoBtn">Load Repository</button>
+      <button id="goToCodeBtn">Go to Code Analysis</button>
     </div>
   </header>
 
   <main>
-    <section class="explorer">
-      <h2>Repository Files</h2> 
-      <ul id="fileList">
-      </ul>
+    <section id="repoSummary">
+      <h2>Repository Summary</h2>
+      <div id="summaryContent">Paste a GitHub repo URL and click "Load Repository".</div>
     </section>
 
-    <section class="viewer">
-      <h2>File Viewer</h2>
-      <pre id="fileContent">// Select a file to view its contents</pre>
-    </section>
-
-    <section class="analysis">
-      <h2>Code Analysis</h2>
-      <div id="analysisResults">
-      </div>
+    <section id="overallAnalysis">
+      <h2>Overall Analysis</h2>
+      <div id="analysisContent"></div>
     </section>
   </main>
 
-  <script type="module" src="js/main.js"></script>
-
+  <script type="module" src="./js/main.js"></script>
   <div id="toastContainer"></div>
-
 </body>
 </html>

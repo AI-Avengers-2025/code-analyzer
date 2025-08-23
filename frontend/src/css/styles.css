@@ -1,9 +1,11 @@
-body {
+
+ body {
   margin: 0;
   font-family: "Segoe UI", Arial, sans-serif;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
+  background: #f4f4f4;
 }
 
 header {
@@ -13,22 +15,26 @@ header {
   display: flex;
   flex-direction: column;
   align-items: center;
+  text-align: center;
 }
 
 .repo-input {
   margin-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .repo-input input {
   padding: 0.5rem;
-  width: 400px;
+  width: 300px;
   border-radius: 6px;
   border: none;
 }
 
 .repo-input button {
   padding: 0.5rem 1rem;
-  margin-left: 0.5rem;
   border: none;
   border-radius: 6px;
   background: #2da44e;
@@ -40,20 +46,29 @@ header {
 main {
   flex: 1;
   display: grid;
-  grid-template-columns: 20% 50% 30%;
+  grid-template-columns: 25% 50% 25%;
+  gap: 1rem;
+  padding: 1rem;
   overflow: hidden;
 }
 
 section {
-  border-right: 1px solid #ddd;
+  background: white;
+  border-radius: 6px;
   padding: 1rem;
+  height: 70vh;
   overflow-y: auto;
   scrollbar-width: thin;
+}
+
+section h2 {
+  margin-top: 0;
 }
 
 .explorer ul {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
 .explorer li {
@@ -66,20 +81,6 @@ section {
   background: #f6f8fa;
 }
 
-.viewer pre {
-  background: #f6f8fa;
-  padding: 1rem;
-  border-radius: 6px;
-  height: 60vh;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  white-space: pre-wrap;
-}
-
-.analysis {
-  background: #f9fafc;
-}
-
 ul.nested {
   list-style: none;
   padding-left: 20px;
@@ -87,6 +88,39 @@ ul.nested {
 
 ul.nested.hidden {
   display: none;
+}
+
+
+.side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.analysis {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #f9fafc;
+
+}
+
+/* .highlighted-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; 
+  margin-bottom: 0.5rem;
+} */
+
+
+.viewer pre {
+  background: #f6f8fa;
+  padding: 1rem;
+  border-radius: 6px;
+  flex: 1;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  margin: 0;
 }
 
 #toastContainer {
@@ -115,5 +149,4 @@ ul.nested.hidden {
   opacity: 1;
   transform: translateY(0);
 }
-
 
