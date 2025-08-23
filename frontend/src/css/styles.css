@@ -1,5 +1,4 @@
-
- body {
+body {
   margin: 0;
   font-family: "Segoe UI", Arial, sans-serif;
   display: flex;
@@ -90,7 +89,6 @@ ul.nested.hidden {
   display: none;
 }
 
-
 .side-panel {
   display: flex;
   flex-direction: column;
@@ -102,16 +100,7 @@ ul.nested.hidden {
   display: flex;
   flex-direction: column;
   background: #f9fafc;
-
 }
-
-/* .highlighted-header {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start; 
-  margin-bottom: 0.5rem;
-} */
-
 
 .viewer pre {
   background: #f6f8fa;
@@ -137,7 +126,7 @@ ul.nested.hidden {
   padding: 0.8rem 1rem;
   margin-top: 0.5rem;
   border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
   opacity: 0;
   transform: translateY(20px);
   transition: opacity 0.3s ease, transform 0.3s ease;
@@ -150,3 +139,279 @@ ul.nested.hidden {
   transform: translateY(0);
 }
 
+.analysis,
+section,
+#fileContent,
+.viewer,
+.explorer {
+  scrollbar-width: auto;
+  scrollbar-color: rgba(60, 60, 60, 0.6) rgba(240, 240, 240, 0.6);
+  scrollbar-gutter: stable;
+}
+
+section::-webkit-scrollbar,
+#fileContent::-webkit-scrollbar,
+.analysis::-webkit-scrollbar,
+.viewer::-webkit-scrollbar,
+.explorer::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+.analysis::-webkit-scrollbar-track,
+section::-webkit-scrollbar-track,
+#fileContent::-webkit-scrollbar-track {
+  background: transparent;
+}
+.analysis::-webkit-scrollbar-thumb,
+section::-webkit-scrollbar-thumb,
+#fileContent::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.18);
+  border-radius: 10px;
+  border: 3px solid rgba(255, 255, 255, 0.6);
+}
+.analysis::-webkit-scrollbar-thumb:hover,
+section::-webkit-scrollbar-thumb:hover,
+#fileContent::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.28);
+}
+
+.analysis-header h3 {
+  margin: 0 0 4px 0;
+  font-size: 1.1rem;
+}
+.analysis-header p {
+  margin: 4px 0 8px 0;
+  color: #333;
+}
+.analysis-body {
+  margin-bottom: 12px;
+  color: #333;
+}
+.analysis-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px;
+  color: #374151;
+}
+
+.analysis-loading p {
+  margin: 0;
+  font-weight: 600;
+  color: #111827;
+}
+.analysis-loading .spinner {
+  margin-left: 0;
+  margin-top: 0;
+}
+.analysis-symbols ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+.analysis-symbols li {
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f3;
+  border-radius: 6px;
+  margin: 8px 0;
+  background: linear-gradient(180deg, #ffffff, #fbfcfd);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
+}
+.analysis-symbols li .symbol-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.analysis-symbols li .symbol-header strong {
+  font-size: 1.02rem;
+  color: #0b1226;
+}
+.analysis-symbols li .symbol-header em {
+  color: #6b7280;
+  font-style: normal;
+  font-size: 0.88rem;
+}
+.analysis-symbols details {
+  margin-top: 8px;
+}
+.analysis-symbols .jump-to-line {
+  margin-top: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: #eef6ff;
+  border: 1px solid #d6e9ff;
+  cursor: pointer;
+  font-weight: 600;
+  color: #0445a4;
+}
+
+.analysis-symbols details summary {
+  list-style: none;
+  cursor: pointer;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #374151;
+  background: transparent;
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+.suggestion-badge {
+  display: inline-block;
+  margin-left: 8px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  vertical-align: middle;
+}
+.analysis-symbols details[open] summary {
+  background: rgba(15, 23, 42, 0.02);
+}
+.analysis-symbols details ul {
+  margin: 8px 0 0 16px;
+  padding-left: 0;
+}
+.analysis-symbols details ul li {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 6px 0;
+  line-height: 1.3;
+}
+.analysis-symbols details ul li code {
+  background: rgba(10, 10, 10, 0.03);
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.symbol-returns {
+  margin-top: 8px;
+  padding: 8px;
+  background: #f7fbff;
+  border-left: 3px solid #d6e9ff;
+  border-radius: 4px;
+  color: #04356a;
+  font-size: 0.95rem;
+}
+.symbol-returns strong {
+  font-weight: 600;
+  margin-right: 6px;
+}
+
+.symbol-desc {
+  margin-top: 8px;
+  color: #374151;
+}
+
+.meta-params {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.meta-params .param {
+  background: #fff;
+  border: 1px solid #f0f2f5;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-family: monospace;
+  color: #111827;
+}
+.meta-params .param code {
+  background: rgba(10, 10, 10, 0.03);
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+.params-compact {
+  margin-top: 8px;
+  color: #6b7280;
+}
+
+.analysis-symbols li:hover {
+  transform: translateY(-2px);
+  transition: transform 120ms ease;
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.06);
+}
+
+.spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 3px solid rgba(0, 0, 0, 0.12);
+  border-left-color: #2b8be6;
+  animation: spin 0.9s linear infinite;
+  vertical-align: middle;
+  margin-left: 8px;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.analysis {
+  max-width: 720px;
+}
+
+#fileContent {
+  font-family: Menlo, Monaco, "Courier New", monospace;
+  font-size: 13px;
+  line-height: 18px;
+  padding: 12px;
+  background: #fafafa;
+  border: 1px solid #eee;
+  overflow: auto;
+  max-height: 600px;
+}
+.code-line {
+  white-space: pre;
+  padding: 0 8px;
+  display: block;
+  line-height: 18px;
+  min-height: 18px;
+}
+.code-line.highlight {
+  background: rgba(43, 139, 230, 0.08);
+  border-left: 3px solid rgba(43, 139, 230, 0.18);
+}
+.code-line .line-number {
+  display: inline-block;
+  width: 40px;
+  color: #888;
+  user-select: none;
+  margin-right: 8px;
+}
+
+.symbol-tooltip {
+  position: fixed;
+  z-index: 9999;
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  max-width: 360px;
+  font-size: 13px;
+  color: #222;
+}
+.symbol-tooltip h5 {
+  margin: 0 0 6px 0;
+  font-size: 13px;
+}
+.symbol-tooltip p {
+  margin: 0;
+}
+
+.symbol-tooltip {
+  transition: opacity 160ms ease, transform 160ms ease;
+  opacity: 0;
+  transform: translateY(6px);
+  pointer-events: auto;
+}
+.symbol-tooltip.show {
+  opacity: 1;
+  transform: translateY(0);
+}
