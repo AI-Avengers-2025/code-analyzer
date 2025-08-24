@@ -157,7 +157,21 @@ jobs:
             echo "Starting/Restarting servers with PM2..."
             cd "../$BACKEND_APP_DIR"
             export NODE_ENV=production 
+
+            if pm2 show backend-server &> /dev/null; then
+              pm2 restart backend-server
+            else
+              pm2 start app.js --name backend-server
+            fi
+            pm2 save
             
-            npm run start
+            cd "../$FRONTEND_APP_DIR"
+
+            if pm2 show frontend-server &> /dev/null; then
+              pm2 restart frontend-server
+            else
+              pm2 start "live-server --port=3000 --open=./src/index.html" --name frontend-server
+            fi
+            pm2 save
 
             echo "Deployment complete."
