@@ -37,11 +37,12 @@
     </article>
 
 
-    <button type="button" id="collapsible" class="hidden">Code Repo Summary</button>
+    <div id="collapsible" class="hidden">
+      <button type="button" >Code Repo Summary Analysis</button>
+    </div>
     <article id="overallAnalysis" class="hidden">
       <p id="analysisContent">Running through repo files...</p>
     </article>
-    <hr class="hidden">
 
 
     <section class="code-section hidden">
@@ -54,12 +55,17 @@
         <h2>File Viewer</h2>
         <pre id="fileContent">// Select a file to view its contents</pre>
       </section>
-
       <section id="analysis" class="analysis hidden">
         <h2>File Analysis</h2>
-        <div id="file-summary-container">
-          <p id="file-summary-content">Click file to summarize</p>
+        <div id="file-summary-container" class="collapsible-text-container">
+          <p id="file-summary-content" class="text-content">Click file to get summary</p>
         </div>
+        <button id="collapsible-btn" class="collapsible-button">
+          <span id="button-text">Read More</span>
+          <svg class="collapsible-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
         <div id="analysisResults">(Overall file analysis placeholder)</div>
       </section>
     </section>
