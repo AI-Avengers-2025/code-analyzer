@@ -23,7 +23,7 @@ export const summarizeRepo = async (githubUrl, githubToken) => {
     I want to create a story of the repo for non-technical people to easily understand.
     This is one file in in number of files from that Github repository. 
     Please provide a high-level, non-technical summary of this file's contents.
-    After all files are summarised, I'll provide you with the summaries and ask you to provide folder-level summaries,
+    After all files are summarized, I'll provide you with the summaries and ask you to provide folder-level summaries,
     so please keep note of the relationships between these files.
     Please focus on the purpose of the project, its key features, and the technologies used. 
     Please don't reply to the prompt in a conversational manner, on reply with the summary.

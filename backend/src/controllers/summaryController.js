@@ -2,6 +2,24 @@ import {readExistingSummaries, saveSummaryToFile, summarizeRepo} from "../servic
 import {getContentsOfRepo} from "../api/github.js";
 import {sendToGemini} from "../api/gemini.js";
 
+
+const fileLevelPrompt = `
+    I want to create a story of the repo for non-technical people to easily understand.
+    This is one file in in number of files from that Github repository. 
+    Please provide a high-level, non-technical summary of this file's contents.
+    After all files are summarized, I'll provide you with the summaries and ask you to provide folder-level summaries,
+    so please keep note of the relationships between these files.
+    Please focus on the purpose of the project, its key features, and the technologies used. 
+    Please don't reply to the prompt in a conversational manner, on reply with the summary.
+    File Contents: 
+    `;
+
+const metaPrompt = `
+    You have been given a series of file-level summaries from a large GitHub repository. 
+    Combine them into a single, comprehensive summary of the entire repository. 
+    Focus on the project's overall purpose, architecture, and key technologies used.
+    Combined Summaries: `;
+
 export const getRepoSummary = async (req, res) => {
   const { githubUrl, githubToken } = req.body;
   try {
@@ -38,17 +56,6 @@ export const streamSummariesToFrontend = async(req, res) => {
 
   res.write('data: ' + JSON.stringify({ totalFiles: fileCount }) + '\n\n');
 
-  const fileLevelPrompt = `
-    I want to create a story of the repo for non-technical people to easily understand.
-    This is one file in in number of files from that Github repository. 
-    Please provide a high-level, non-technical summary of this file's contents.
-    After all files are summarised, I'll provide you with the summaries and ask you to provide folder-level summaries,
-    so please keep note of the relationships between these files.
-    Please focus on the purpose of the project, its key features, and the technologies used. 
-    Please don't reply to the prompt in a conversational manner, on reply with the summary.
-    File Contents: 
-    `;
-
   const repoFileSummaries = [];
   let i = 1;
   const outputFileName = `${repo}.json`;
@@ -72,31 +79,73 @@ export const streamSummariesToFrontend = async(req, res) => {
       continue;
     }
 
-    const summary = await sendToGemini(fileLevelPrompt + fileContents);
+    const summaryObject = await getAndSaveSummary(fileLevelPrompt, fileContents, filePath, outputFileName, 'file')
 
-    const summaryObject = {
-      date: new Date().toISOString(),
-      filename: filePath,
-      summaryLevel: 'file',
-      summary: summary
-    };
     repoFileSummaries.push(summaryObject);
-
-    saveSummaryToFile(outputFileName, summaryObject);
 
     i++;
   }
 
   res.write('data: ' + JSON.stringify({ status: 'generating_final_summary', message: 'Generating overall repository summary...' }) + '\n\n');
 
-  const combinedSummaries = repoFileSummaries.map(item => item.summary).join('\n\n--- File Summary ---\n\n');
-  const finalSummary = await sendToGemini(combinedSummaries);
+  let finalSummary = existingSummaries.find(s => s.filename === '' && s.summaryLevel === 'repo')?.summary;
+
+  if (!finalSummary) {
+    const combinedSummaries = repoFileSummaries.map(item => item.summary).join('\n\n--- File Summary ---\n\n');
+
+    const finalSummaryObject = await getAndSaveSummary(metaPrompt + combinedSummaries, '', '', outputFileName, 'repo')
+
+    finalSummary = finalSummaryObject.summary;
+  }
 
   const finalMessage = {
     status: 'complete',
     message: 'Summary complete!',
     finalSummary: finalSummary
   };
+
   res.write('data: ' + JSON.stringify(finalMessage) + '\n\n');
-  res.end(); // Close the connection
+  res.end();
+}
+
+const getAndSaveSummary = async (prompt, fileContents, filePath, outputFileName, summaryLevel) => {
+  const summary = await sendToGemini(prompt + fileContents);
+
+  const summaryObject = {
+    date: new Date().toISOString(),
+    filename: filePath,
+    summaryLevel: summaryLevel,
+    summary: summary
+  };
+
+  saveSummaryToFile(outputFileName, summaryObject);
+
+  return summaryObject;
+}
+
+
+export const getFileSummary = async (req, res) => {
+  try {
+    const { repoName, filePath, fileContents } = req.body;
+
+    console.log('repoName', repoName);
+
+    const outputFileName = `${repoName}.json`;
+    const existingSummaries = readExistingSummaries(outputFileName);
+
+    console.log('existingSummaries', existingSummaries);
+
+    const existingSummary = existingSummaries.find(s => s.filename === filePath);
+    console.log('existingSummary', existingSummary);
+
+    if (!existingSummary) {
+      const summaryObject = await getAndSaveSummary(fileLevelPrompt, fileContents, filePath, outputFileName, 'file')
+
+      res.json({ summary: summaryObject.summary });
+    }
+
+    res.json({ summary: existingSummary.summary });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 }

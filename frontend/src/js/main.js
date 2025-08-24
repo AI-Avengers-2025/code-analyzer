@@ -1,5 +1,6 @@
 import { showToast } from "./toast.js";
 import { BASE_URL } from "../config.js";
+import {loadRepo} from "./repoLoader.js";
 
 window.addEventListener("DOMContentLoaded", async () => {
   const saved = sessionStorage.getItem("repoSummary");
@@ -32,7 +33,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-document.getElementById("loadRepoBtn").addEventListener("click", async () => {
+document.getElementById("goToCodeBtn").addEventListener("click", async () => {
   const repoUrl = document.getElementById("repoUrl").value.trim();
   if (!repoUrl) return showToast("Please enter a GitHub repository URL");
 
@@ -45,12 +46,16 @@ document.getElementById("loadRepoBtn").addEventListener("click", async () => {
   sessionStorage.setItem("repoOwner", owner);
   sessionStorage.setItem("repoName", repo);
 
+  document.getElementById('code-section').classList.remove('hidden');
+
   document.getElementById("summaryContent").innerHTML = `
     <div style="display:flex; align-items:center; justify-content:center; padding:20px;">
       <div class="loader"></div>
       <span style="margin-left:10px;">Loading repository summary...</span>
     </div>
   `;
+
+  document.getElementById("no-repo-loaded-msg").classList.add('hidden');
 
   try {
     await nonTechnicalSummary(repoUrl);
@@ -64,6 +69,12 @@ document.getElementById("loadRepoBtn").addEventListener("click", async () => {
       ).innerHTML = `<p style="color:red">Error: ${data.error}</p>`;
       return;
     }
+
+    document.getElementById('repoSummary').classList.remove('hidden');
+    document.getElementById('code-section').classList.remove('hidden');
+    document.getElementById('explorer').classList.remove('hidden');
+    document.getElementById('viewer').classList.remove('hidden');
+    document.getElementById('analysis').classList.remove('hidden');
 
     const htmlRes = await fetch("./pages/repoSummary.html");
     const summaryTemplate = await htmlRes.text();
@@ -95,18 +106,19 @@ document.getElementById("loadRepoBtn").addEventListener("click", async () => {
         analysis: "(Overall repo analysis placeholder)",
       })
     );
+
+    const fileContainer = document.getElementById("fileList");
+
+    if (owner && repo) {
+      await loadRepo(owner, repo, fileContainer);
+    }
   } catch (err) {
     showToast("Failed to fetch repository summary");
     console.error(err);
   }
 });
 
-document.getElementById("goToCodeBtn").addEventListener("click", () => {
-  window.location.href = "./pages/codeView.html";
-});
-
 async function nonTechnicalSummary(repoUrl) {
-
   const githubUrl = repoUrl.replace(".git", "");
 
   document.getElementById('progress-container').classList.remove('hidden');
@@ -158,17 +170,17 @@ function updateUIProgress(current, total) {
 }
 
 function displayFinalSummary(summary) {
+  document.getElementById('progress-bar').classList.add('hidden');
+  document.getElementById('progress-text').classList.add('hidden');
 
   const overallAnalysis = document.getElementById('overallAnalysis');
   const overallAnalysisContent = document.getElementById('analysisContent');
-
 
   const collapsibleButton = document.getElementById("collapsible");
 
   collapsibleButton.classList.remove('hidden');
 
   collapsibleButton.addEventListener("click", function() {
-    document.getElementById('progress-container').classList.add('hidden');
     this.classList.toggle("active");
     if (overallAnalysis.style.display === "block") {
       overallAnalysis.style.display = "none";

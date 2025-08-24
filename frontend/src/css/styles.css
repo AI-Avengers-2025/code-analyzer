@@ -42,7 +42,7 @@ header {
   font-weight: bold;
 }
 
-main {
+#code-section {
   flex: 1;
   display: grid;
   grid-template-columns: 25% 50% 25%;
@@ -423,9 +423,10 @@ section::-webkit-scrollbar-thumb:hover,
  padding: 18px;
  width: 100%;
  border: none;
- text-align: left;
+ text-align: center;
  outline: none;
- font-size: 15px;
+ font-size: 1.5em;
+ font-weight: bold;
 }
 
 .active, #collapsible:hover {
@@ -447,7 +448,7 @@ section::-webkit-scrollbar-thumb:hover,
  margin-left: 5px;
 }
 
-.active:after {
+#collapsible.active:after {
  content: "\2796";
 }
 
@@ -466,4 +467,33 @@ section::-webkit-scrollbar-thumb:hover,
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+#no-repo-loaded-msg {
+  background: transparent;
+  justify-self: center;
+  align-content: center;
+  max-width: max-content;
+  height: 70vh;
+}
+
+#no-repo-loaded-msg h3{
+  text-align: center;
+  border: 4px solid #eee;
+  border-radius: 30px;
+  background: #fff;
+  padding: 1em;
+}
+
+hr {
+  border-top: 10px dashed #24292e;
+  width: 80vw;
+  background-color: white;
+}
+
+#file-summary-container {
+  border: 0.5em solid #24292e;
+  border-radius: 1em;
+  padding: 0.5em;
+  background: rgba(36, 41, 46, 0.15);
 }
