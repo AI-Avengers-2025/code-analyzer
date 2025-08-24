@@ -83,7 +83,7 @@ jobs:
             echo "Installing backend app dependencies..."
             npm install
 
-            cd "../$FRONTEND_APP_DIR"
+            cd "$FRONTEND_APP_DIR"
             # Install frontend app dependencies
             echo "Installing frontend app dependencies..."
             npm install
@@ -155,17 +155,17 @@ jobs:
 
             # Start/restart ai-avengers-server with PM2
             echo "Starting/Restarting servers with PM2..."
-            cd "../$BACKEND_APP_DIR"
+            cd "$BACKEND_APP_DIR"
             export NODE_ENV=production 
 
             if pm2 show backend-server &> /dev/null; then
               pm2 restart backend-server
             else
-              pm2 start app.js --name backend-server
+              pm2 start src/server.js --name backend-server
             fi
             pm2 save
             
-            cd "../$FRONTEND_APP_DIR"
+            cd "$FRONTEND_APP_DIR"
 
             if pm2 show frontend-server &> /dev/null; then
               pm2 restart frontend-server
