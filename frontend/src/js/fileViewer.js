@@ -488,6 +488,13 @@ async function renderFilePerLine(content) {
       line.appendChild(ln);
       line.appendChild(code);
       frag.appendChild(line);
+      line.onmouseenter = (e) => {
+        container.querySelectorAll('.code-line.hovered').forEach(el => el.classList.remove('hovered'));
+        e.target.classList.add("hovered");
+      }
+      line.onmouseleave = (e) => {
+        e.target.classList.remove("hovered");
+      }
     });
     container.appendChild(frag);
     return;

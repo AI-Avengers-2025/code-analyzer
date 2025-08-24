@@ -415,3 +415,9 @@ section::-webkit-scrollbar-thumb:hover,
   opacity: 1;
   transform: translateY(0);
 }
+
+
+.hovered {
+  background: rgba(43, 139, 230, 0.04);
+  cursor: pointer;
+}
