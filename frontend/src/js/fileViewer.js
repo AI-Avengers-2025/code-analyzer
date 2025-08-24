@@ -1,10 +1,11 @@
-import { showToast } from "./toast.js";
+import { showToast } from './toast.js';
+import { BASE_URL } from "../config.js";
 
 const DEBUG_HIGHLIGHT =
   (typeof window !== "undefined" && window.DEBUG_HIGHLIGHT) || false;
 
 export async function fetchAndRenderFiles(owner, repo, path, container, githubToken) {
-  const apiUrl = `http://localhost:4000/api/repo/${owner}/${repo}/${encodeURIComponent(
+  const apiUrl = `${BASE_URL}/api/repo/${owner}/${repo}/${encodeURIComponent(
     path
   )}${githubToken ? `?githubToken=${githubToken}`: ''}`;
   try {
@@ -54,12 +55,8 @@ export async function loadFile(repoName, file) {
         "<p>No analysis available.</p>";
       return;
     }
-    const res = await fetch(
-      `http://localhost:4000/api/repo/file?url=${encodeURIComponent(
-        file.download_url
-      )}`
-    );
-    if (!res.ok) throw new Error("File fetch failed");
+    const res = await fetch(`${BASE_URL}/api/repo/file?url=${encodeURIComponent(file.download_url)}`);
+    if (!res.ok) throw new Error('File fetch failed');
     const content = await res.text();
     const normalizedContent = String(content)
       .replace(/\r\n/g, "\n")
@@ -70,19 +67,11 @@ export async function loadFile(repoName, file) {
       file.name
     )}</strong> loaded.</p><span>Analyzing...</span><span class="spinner" aria-hidden="true"></span></div>`;
     try {
-      const analyzeRes = await fetch(
-        "http://localhost:4000/api/analysis/file",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            filePath: file.path || file.name,
-            fileContent: normalizedContent,
-            language: "auto",
-            callGemini: true,
-          }),
-        }
-      );
+      const analyzeRes = await fetch(`${BASE_URL}/api/analysis/file`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filePath: file.path || file.name, fileContent: normalizedContent, language: 'auto', callGemini: true })
+      });
       if (!analyzeRes.ok) {
         const txt = await analyzeRes.text();
         throw new Error(`Analyze failed: ${analyzeRes.status} ${txt}`);
@@ -156,12 +145,7 @@ function renderAnalysis(container, analysisObj, fullPayload) {
   const analysisHtml = `
     <div class="analysis-body">
       <h4>Analysis</h4>
-      <p>${escapeHtml(fileAnalysis.responsibilities || "")}</p>
-      <p>${escapeHtml(
-        fileAnalysis.surprisingOrRiskyCode ||
-          fileAnalysis.surprising_or_risky ||
-          ""
-      )}</p>
+      <p>${escapeHtml(fileAnalysis || '')}</p>
     </div>
   `;
   const symbolsWrapper = document.createElement("div");
@@ -792,7 +776,7 @@ function wireSymbolInteractions(container) {
 async function retrieveNonTechnicalSummary(repoName, filePath, fileContents) {
   const fileSummaryContent = document.getElementById('file-summary-content');
 
-  const response = await fetch('http://localhost:4000/api/summary/file', {
+  const response = await fetch(`${BASE_URL}/api/summary/file`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ repoName, filePath, fileContents })
