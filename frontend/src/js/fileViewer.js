@@ -44,7 +44,7 @@ export async function loadFile(file) {
       document.getElementById('analysisResults').innerHTML = '<p>No analysis available.</p>';
       return;
     }
-    const res = await fetch(`http://localhost:4000/api/repo/file?url=${encodeURIComponent(file.download_url)}`);
+    const res = await fetch(`${BASE_URL}/api/repo/file?url=${encodeURIComponent(file.download_url)}`);
     if (!res.ok) throw new Error('File fetch failed');
     const content = await res.text();
     const normalizedContent = String(content).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
@@ -52,7 +52,7 @@ export async function loadFile(file) {
     const analysisEl = document.getElementById('analysisResults');
     analysisEl.innerHTML = `<div class="analysis-loading"><p><strong>${escapeHtml(file.name)}</strong> loaded.</p><span>Analyzing...</span><span class="spinner" aria-hidden="true"></span></div>`;
     try {
-      const analyzeRes = await fetch('http://localhost:4000/api/analysis/file', {
+      const analyzeRes = await fetch(`${BASE_URL}/api/analysis/file`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ filePath: file.path || file.name, fileContent: normalizedContent, language: 'auto', callGemini: true })

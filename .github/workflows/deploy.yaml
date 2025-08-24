@@ -77,6 +77,7 @@ jobs:
             GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}
             GOOGLE_APPLICATION_CREDENTIALS=null
             DEBUG_DOTENV=false
+            GITHUB_TOKEN=${{ secrets._GITHUB_TOKEN }}
             EOF
 
             # Install backend app dependencies
