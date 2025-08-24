@@ -1,12 +1,13 @@
-import { showToast } from "./toast.js";
+import { showToast } from './toast.js';
+import { BASE_URL } from "../config.js";
 
 const DEBUG_HIGHLIGHT =
   (typeof window !== "undefined" && window.DEBUG_HIGHLIGHT) || false;
 
-export async function fetchAndRenderFiles(owner, repo, path, container) {
-  const apiUrl = `http://localhost:4000/api/repo/${owner}/${repo}/${encodeURIComponent(
+export async function fetchAndRenderFiles(owner, repo, path, container, githubToken) {
+  const apiUrl = `${BASE_URL}/api/repo/${owner}/${repo}/${encodeURIComponent(
     path
-  )}`;
+  )}${githubToken ? `?githubToken=${githubToken}`: ''}`;
   try {
     const res = await fetch(apiUrl);
     const files = await res.json();
@@ -26,11 +27,11 @@ export async function fetchAndRenderFiles(owner, repo, path, container) {
         span.addEventListener("click", async (e) => {
           e.stopPropagation();
           if (nestedUl.childElementCount === 0)
-            await fetchAndRenderFiles(owner, repo, file.path, nestedUl);
+            await fetchAndRenderFiles(owner, repo, file.path, nestedUl, githubToken);
           nestedUl.classList.toggle("hidden");
         });
-      } else if (file.type === "file") {
-        span.addEventListener("click", () => loadFile(file));
+      } else if (file.type === 'file') {
+        span.addEventListener('click', () => loadFile(repo, file));
         li.appendChild(span);
       }
       container.appendChild(li);
@@ -41,7 +42,7 @@ export async function fetchAndRenderFiles(owner, repo, path, container) {
   }
 }
 
-export async function loadFile(file) {
+export async function loadFile(repoName, file) {
   try {
     if (!file.download_url) {
       document.getElementById("fileContent").textContent =
@@ -50,12 +51,8 @@ export async function loadFile(file) {
         "<p>No analysis available.</p>";
       return;
     }
-    const res = await fetch(
-      `http://localhost:4000/api/repo/file?url=${encodeURIComponent(
-        file.download_url
-      )}`
-    );
-    if (!res.ok) throw new Error("File fetch failed");
+    const res = await fetch(`${BASE_URL}/api/repo/file?url=${encodeURIComponent(file.download_url)}`);
+    if (!res.ok) throw new Error('File fetch failed');
     const content = await res.text();
     const normalizedContent = String(content)
       .replace(/\r\n/g, "\n")
@@ -66,19 +63,11 @@ export async function loadFile(file) {
       file.name
     )}</strong> loaded.</p><span>Analyzing...</span><span class="spinner" aria-hidden="true"></span></div>`;
     try {
-      const analyzeRes = await fetch(
-        "http://localhost:4000/api/analysis/file",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            filePath: file.path || file.name,
-            fileContent: normalizedContent,
-            language: "auto",
-            callGemini: true,
-          }),
-        }
-      );
+      const analyzeRes = await fetch(`${BASE_URL}/api/analysis/file`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filePath: file.path || file.name, fileContent: normalizedContent, language: 'auto', callGemini: true })
+      });
       if (!analyzeRes.ok) {
         const txt = await analyzeRes.text();
         throw new Error(`Analyze failed: ${analyzeRes.status} ${txt}`);
@@ -100,6 +89,8 @@ export async function loadFile(file) {
         String(analysisErr.message || analysisErr)
       )}</p>`;
     }
+
+    await retrieveNonTechnicalSummary(repoName, file.path, normalizedContent)
   } catch (err) {
     console.error("Error loading file:", err);
     document.getElementById(
@@ -150,12 +141,7 @@ function renderAnalysis(container, analysisObj, fullPayload) {
   const analysisHtml = `
     <div class="analysis-body">
       <h4>Analysis</h4>
-      <p>${escapeHtml(fileAnalysis.responsibilities || "")}</p>
-      <p>${escapeHtml(
-        fileAnalysis.surprisingOrRiskyCode ||
-          fileAnalysis.surprising_or_risky ||
-          ""
-      )}</p>
+      <p>${escapeHtml(fileAnalysis || '')}</p>
     </div>
   `;
   const symbolsWrapper = document.createElement("div");
@@ -771,7 +757,7 @@ function wireSymbolInteractions(container) {
       }, 150);
     });
   });
-
+  
   const fileContentEl = document.getElementById("fileContent");
   if (fileContentEl) {
     fileContentEl.addEventListener("scroll", () => {
@@ -781,4 +767,21 @@ function wireSymbolInteractions(container) {
 
   window.addEventListener("scroll", hideSymbolTooltip, { passive: true });
   window.addEventListener("resize", hideSymbolTooltip);
+}
+
+async function retrieveNonTechnicalSummary(repoName, filePath, fileContents) {
+  const fileSummaryContent = document.getElementById('file-summary-content');
+
+  fileSummaryContent.innerHTML = '<p id="file-summary-content">Summarizing file...</p>';
+
+  const response = await fetch(`${BASE_URL}/api/summary/file`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ repoName, filePath, fileContents })
+  });
+
+  const nonTechnicalSummary = await response.json();
+
+  fileSummaryContent.innerHTML = marked.parse(nonTechnicalSummary.summary);
+
 }

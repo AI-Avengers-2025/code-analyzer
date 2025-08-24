@@ -10,24 +10,65 @@
     <h1>GitHub Repository Explorer</h1>
     <div class="repo-input">
       <input type="text" id="repoUrl" placeholder="Paste GitHub repo URL here...">
-      <button id="loadRepoBtn">Load Repository</button>
-      <button id="goToCodeBtn">Go to Code Analysis</button>
+      <input type="text" id="github-token" placeholder="Paste your GitHub token here...">
+      <button id="goToCodeBtn">Analyse Repo</button>
+    </div>
+    <p><i>*If you'd like to analyse private repos, please include your Github token. Otherwise, it's not required</i></p>
+    <div id="progress-container" class="hidden">
+      <p id="status-message" class="text-center text-gray-700 font-semibold mb-2"></p>
+      <div class="w-full bg-gray-200 rounded-full h-4 relative overflow-hidden shadow-inner">
+        <div
+                id="progress-bar"
+                class="bg-blue-500 h-full text-center text-xs text-white transition-all duration-500 ease-out"
+                style="width: 0%;"
+        ></div>
+      </div>
+      <p id="progress-text" class="text-center text-gray-500 mt-2 text-sm"></p>
     </div>
   </header>
 
   <main>
-    <section id="repoSummary">
-      <h2>Repository Summary</h2>
-      <div id="summaryContent">Paste a GitHub repo URL and click "Load Repository".</div>
+    <section id="no-repo-loaded-msg">
+      <h3>Paste a GitHub repo URL and click "Analyse Repo" to continue</h3>
     </section>
 
-    <section id="overallAnalysis">
-      <h2>Overall Analysis</h2>
-      <div id="analysisContent"></div>
+    <article id="repoSummary" class="hidden">
+      <div id="summaryContent">Paste a GitHub repo URL and click "Analyse Repo".</div>
+    </article>
+
+
+    <button type="button" id="collapsible" class="hidden">Code Repo Summary</button>
+    <article id="overallAnalysis" class="hidden">
+      <p id="analysisContent">Running through repo files...</p>
+    </article>
+    <hr class="hidden">
+
+
+    <section class="code-section hidden">
+      <section id="explorer" class="explorer hidden">
+        <h2>Repository Files</h2>
+        <ul id="fileList"></ul>
+      </section>
+
+      <section id="viewer" class="viewer hidden">
+        <h2>File Viewer</h2>
+        <pre id="fileContent">// Select a file to view its contents</pre>
+      </section>
+
+      <section id="analysis" class="analysis hidden">
+        <h2>File Analysis</h2>
+        <div id="file-summary-container">
+          <p id="file-summary-content">Click file to summarize</p>
+        </div>
+        <div id="analysisResults">(Overall file analysis placeholder)</div>
+      </section>
     </section>
+
   </main>
 
+  <script type="module" src="../js/codeView.js"></script>
   <script type="module" src="./js/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <div id="toastContainer"></div>
 </body>
 </html>

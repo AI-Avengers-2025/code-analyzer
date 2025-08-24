@@ -17,17 +17,10 @@ function getGenAIClient(apiKey = "") {
 }
 
 function prepareGeminiPayload({
-  filePath = "",
   fileContent = "",
-  language = "auto",
 } = {}) {
-  const fileSummary = {
-    filePath,
-    language,
-    lines: fileContent.split(/\r?\n/).length,
-    chars: fileContent.length,
-  };
   const parts = [];
+
   parts.push(
     "Produce a single JSON object (no explanatory text) describing the file and its symbols. do not append a json indicator to the output. it should be parsable as JSON."
   );
@@ -36,38 +29,63 @@ function prepareGeminiPayload({
     "- Provide a file-level summary: purpose, inferred language, and shortDescription (1-2 sentences)."
   );
   parts.push(
-    "- Provide a longer fileAnalysis explaining responsibilities, important functions/classes, patterns, and any surprising or risky code."
-  );
-  parts.push("- For symbols: return an array where each item has:");
-  parts.push("  { name, kind (function/class/variable), startLine, endLine,");
-  parts.push(
-    "    params: [ { name, inferredType (string|null), typeConfidence (0-1), description } ],"
-  );
-  parts.push("    returnType: { type: string|null, confidence: 0-1 },");
-  parts.push(
-    "    shortDescription, longDescription, references (list of line numbers), snippet, complexity (low|medium|high), securityConcerns (array), suggestions (array of {type, description, patch?}), confidence (0-1)"
-  );
-  parts.push("  }");
-  parts.push("Output rules:");
-  parts.push(
-    "- Output must be valid JSON only. Do not include any markdown or commentary."
-  );
-  parts.push(
-    "- Do not add new lines or special characters to stylize the JSON output."
-  );
-  parts.push(
-    "- For any inferred types, use common type names (e.g., string, number, boolean, object, Array<string>, Promise<number>, null if unknown)."
-  );
-  parts.push(
-    "- Provide numeric confidence values (0.0 - 1.0) for inferred types and overall symbol confidence."
-  );
-  parts.push(
-    "- The top-level object MUST include: filePath, language, fileSummary, fileAnalysis, symbols (array)."
-  );
-  parts.push(
-    "URI Encoded File content (send full file, truncate only when extremely large):"
+    "- Provide a less than 3 sentence fileAnalysis explaining responsibilities of the code."
   );
 
+  parts.push(
+    "Generate a single, valid JSON object for the following code file. The output must contain ONLY the JSON object, with no additional text, markdown, or commentary."
+  );
+
+  parts.push("The JSON object schema must be exactly as follows:");
+  parts.push("{");
+  parts.push('  "filePath": "string",');
+  parts.push('  "language": "string",');
+  parts.push('  "fileSummary": {');
+  parts.push('    "purpose": "string",');
+  parts.push('    "inferredLanguage": "string",');
+  parts.push('    "shortDescription": "string"');
+  parts.push("  },");
+  parts.push('  "fileAnalysis": "string",');
+  parts.push('  "symbols": [');
+  parts.push("    {");
+  parts.push('      "name": "string",');
+  parts.push('      "kind": "function" | "class" | "variable",');
+  parts.push('      "startLine": "number",');
+  parts.push('      "endLine": "number",');
+  parts.push(
+    '      "params": [ { "name": "string", "inferredType": "string", "typeConfidence": "number", "description": "string" } ],'
+  );
+  parts.push(
+    '      "returnType": { "type": "string", "confidence": "number" },'
+  );
+  parts.push('      "shortDescription": "string",');
+  parts.push('      "longDescription": "string",');
+  parts.push('      "references": [ "number" ],');
+  parts.push('      "snippet": "string",');
+  parts.push('      "complexity": "low" | "medium" | "high",');
+  parts.push('      "securityConcerns": [ "string" ],');
+  parts.push(
+    '      "suggestions": [ { "type": "string", "description": "string", "patch": "string" } ],'
+  );
+  parts.push('      "confidence": "number"');
+  parts.push("    }");
+  parts.push("  ]");
+  parts.push("}");
+  parts.push("");
+
+  parts.push("Your response must be **only** a valid JSON object.");
+  parts.push(
+    "Do **not** include any markdown formatting, such as ```json or ```"
+  );
+  parts.push(
+    "Do **not** include any explanatory text, commentary, or conversational filler"
+  );
+  parts.push("Your response must be **only** a valid JSON object.");
+  parts.push(
+    "The output must be a single, raw JSON string, parsable directly by a JSON parser"
+  );
+
+  parts.push("File content to analyze:");
   parts.push(
     "i will number the lines of code for you, code starts after this line:"
   );
@@ -76,16 +94,22 @@ function prepareGeminiPayload({
     parts.push(`${idx + 1}: ` + line + " " + "");
   });
 
-  parts.push("Produce the final JSON as described above.");
+  parts.push("");
+  parts.push(
+    "Your response must strictly adhere to the JSON schema provided above."
+  );
+
   const prompt = parts.join("\n");
   const payload = {
     model: "gemini-2.5-flash",
-    contents: prompt,
-    maxTokens: 400500,
+    contents: [{ text: prompt }],
+    generationConfig: {
+      temperature: 0.1,
+      maxOutputTokens: 2048, 
+    },
   };
 
-  console.log("Gemini payload:", prompt);
-  return { fileSummary, payload };
+  return { payload };
 }
 
 async function analyzeFile(req, res) {
@@ -126,6 +150,7 @@ async function analyzeFile(req, res) {
         (Array.isArray(response?.candidates) &&
           response.candidates[0]?.content) ||
         JSON.stringify(response);
+      console.log(text);
       let _processedText = `${text}`.trim();
       const startIndex = _processedText.indexOf("{");
       if (startIndex > 0) {
