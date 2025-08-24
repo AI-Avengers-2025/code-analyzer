@@ -41,10 +41,8 @@ jobs:
           script: |
             APP_DOMAIN="${{ vars.APP_DOMAIN }}"
             CERTBOT_EMAIL="${{ secrets.CERTBOT_EMAIL }}"
-            APP_DIR="/home/${{ vars.EC2_USER }}/application/backend"
-            mkdir -p "$APP_DIR"
-            cd "$APP_DIR"
-            echo "--- Deploying to EC2: $(pwd) ---"
+            BACKEND_APP_DIR="/home/${{ vars.EC2_USER }}/application/backend"
+            FRONTEND_APP_DIR="/home/${{ vars.EC2_USER }}/application/frontend"
 
             # Install NVM and Node.js 22.13.0
             export NVM_DIR="$HOME/.nvm"
@@ -67,8 +65,12 @@ jobs:
               npm install -g pm2
             fi
 
+            echo "--- Deploying application: $(pwd) ---"
+
+            cd "$BACKEND_APP_DIR"
+
             echo "Writing environment variables to .env..."
-            cat <<EOF > "$APP_DIR/.env"
+            cat <<EOF > "$BACKEND_APP_DIR/.env"
             NODE_ENV=production
             PORT=4000
             ENABLE_GEMINI=true
@@ -77,13 +79,14 @@ jobs:
             DEBUG_DOTENV=false
             EOF
 
-            # Install app dependencies
-            echo "Installing app dependencies..."
+            # Install backend app dependencies
+            echo "Installing backend app dependencies..."
             npm install
 
-            # Build the app
-            echo "Building the app..."
-            npm run build
+            cd "../$FRONTEND_APP_DIR"
+            # Install frontend app dependencies
+            echo "Installing frontend app dependencies..."
+            npm install
 
             # --- NGINX SETUP ---
             echo "--- Configuring Nginx ---"
@@ -150,20 +153,11 @@ jobs:
             echo "Reloading Nginx with SSL..."
             sudo nginx -t && sudo systemctl reload nginx
 
-            # Copy all files except src/, node_modules/, and dist
-            echo "Copying runtime files to dist/ ..."
-            mkdir -p dist
-            rsync -av --exclude='src' --exclude='node_modules' --exclude='dist' ./ dist/
-
             # Start/restart ai-avengers-server with PM2
-            echo "Starting/Restarting ai-avengers-server with PM2..."
-            cd dist
+            echo "Starting/Restarting servers with PM2..."
+            cd "../$BACKEND_APP_DIR"
             export NODE_ENV=production 
-            if pm2 show ai-avengers-server &> /dev/null; then
-              pm2 restart ai-avengers-server
-            else
-              pm2 start app.js --name ai-avengers-server
-            fi
-            pm2 save
+            
+            npm run start
 
             echo "Deployment complete."
