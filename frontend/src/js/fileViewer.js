@@ -5,7 +5,7 @@ const DEBUG_HIGHLIGHT =
   (typeof window !== "undefined" && window.DEBUG_HIGHLIGHT) || false;
 
 export async function fetchAndRenderFiles(owner, repo, path, container, githubToken) {
-  const apiUrl = `http://localhost:4000/api/repo/${owner}/${repo}/${encodeURIComponent(
+  const apiUrl = `${BASE_URL}/api/repo/${owner}/${repo}/${encodeURIComponent(
     path
   )}${githubToken ? `?githubToken=${githubToken}`: ''}`;
   try {
@@ -774,7 +774,7 @@ async function retrieveNonTechnicalSummary(repoName, filePath, fileContents) {
 
   fileSummaryContent.innerHTML = '<p id="file-summary-content">Summarizing file...</p>';
 
-  const response = await fetch('http://localhost:4000/api/summary/file', {
+  const response = await fetch(`${BASE_URL}/api/summary/file`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ repoName, filePath, fileContents })
