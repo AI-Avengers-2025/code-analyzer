@@ -1,8 +1,7 @@
-import { fetchRepoContents, fetchFileContent } from "../services/repoService.js";
+import { fetchRepoContents, fetchFileContent, fetchRepoSummary } from "../services/repoService.js";
 
 export async function getRepoContents(req, res) {
   const { owner, repo } = req.params;
-
   let path = req.params[0] || "";
   if (path.startsWith("/")) path = path.slice(1);
 
@@ -10,7 +9,7 @@ export async function getRepoContents(req, res) {
     const data = await fetchRepoContents(owner, repo, path);
     res.json(data);
   } catch (err) {
-    console.error("Controller Error:", err.message);
+    console.error("Get Repo Contents Controller Error:", err.message);
     res.status(500).json({ error: err.message });
   }
 }
@@ -23,7 +22,20 @@ export async function getFileContent(req, res) {
     const content = await fetchFileContent(url);
     res.send(content);
   } catch (err) {
-    console.error("Controller Error:", err.message);
+    console.error("Get File Content Controller Error:", err.message);
     res.status(500).json({ error: err.message });
   }
 }
+
+// New controller for repo summary
+export async function getRepoSummary(req, res) {
+  const { owner, repo } = req.params;
+  try {
+    const summary = await fetchRepoSummary(owner, repo);
+    res.json(summary);
+  } catch (err) {
+    console.error("Get Repo Summary Controller Error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+}
+
