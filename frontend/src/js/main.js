@@ -1,4 +1,3 @@
-
 import { showToast } from "./toast.js";
 import { BASE_URL } from "../config.js";
 
@@ -16,27 +15,46 @@ document.getElementById("loadRepoBtn").addEventListener("click", async () => {
   sessionStorage.setItem("repoName", repo);
 
   try {
-    const res = await fetch(`${BASE_URL}/api/repo/${owner}/${repo}`);
+    const res = await fetch(`${BASE_URL}/api/repo/${owner}/${repo}/summary`);
     const data = await res.json();
 
-    const summaryHTML = `
-      <p>Repo: <strong>${owner}/${repo}</strong></p>
-      <p>Total files/folders: ${data.length}</p>
-    `;
-    document.getElementById("summaryContent").innerHTML = summaryHTML;
-    document.getElementById("analysisContent").innerHTML =
-      `<p>(Overall repo analysis placeholder)</p>`;
+    if (data.error) {
+      document.getElementById(
+        "summaryContent"
+      ).innerHTML = `<p style="color:red">Error: ${data.error}</p>`;
+      return;
+    }
+
+    const htmlRes = await fetch("./pages/repoSummary.html");
+    const summaryTemplate = await htmlRes.text();
+    document.getElementById("summaryContent").innerHTML = summaryTemplate;
+
+    document.getElementById("repo-title").textContent = `${owner}/${repo}`;
+    document.getElementById("defaultBranch").textContent = data.defaultBranch;
+    document.getElementById("totalFiles").textContent = data.totalFiles;
+    document.getElementById("totalFolders").textContent = data.totalFolders;
+    document.getElementById("branches").textContent = data.branches.join(", ");
+    document.getElementById("contributors").textContent = data.contributors
+      .map((c) => c.login)
+      .join(", ");
+    document.getElementById("stars").textContent = data.stars;
+    document.getElementById("forks").textContent = data.forks;
+    document.getElementById("openIssues").textContent = data.openIssues;
+    document.getElementById("license").textContent = data.license;
+
+    document.getElementById(
+      "analysisContent"
+    ).innerHTML = `<p>(Overall repo analysis placeholder)</p>`;
 
     localStorage.setItem(
       "repoSummary",
       JSON.stringify({
         owner,
         repo,
-        totalFiles: data.length,
-        analysis: "(Overall repo analysis placeholder)"
+        ...data,
+        analysis: "(Overall repo analysis placeholder)",
       })
     );
-
   } catch (err) {
     showToast("Failed to fetch repository summary");
     console.error(err);

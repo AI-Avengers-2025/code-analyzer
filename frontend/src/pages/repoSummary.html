@@ -1,0 +1,92 @@
+<div id="repo-summary" class="card">
+  <h3 id="repo-title" class="section-title">Repository Summary</h3>
+
+  <div class="summary-list">
+    <div class="stat-row">
+      <span class="label">Default branch</span>
+      <span class="value" id="defaultBranch"></span>
+    </div>
+    <div class="stat-row">
+      <span class="label">Total Files</span>
+      <span class="value" id="totalFiles"></span>
+    </div>
+    <div class="stat-row">
+      <span class="label">Total Folders</span>
+      <span class="value" id="totalFolders"></span>
+    </div>
+    <div class="stat-row">
+      <span class="label">Branches</span>
+      <span class="value" id="branches"></span>
+    </div>
+    <div class="stat-row">
+      <span class="label">Contributors</span>
+      <span class="value" id="contributors"></span>
+    </div>
+    <div class="stat-row">
+      <span class="label">Stars</span>
+      <span class="value" id="stars"></span>
+    </div>
+    <div class="stat-row">
+      <span class="label">Forks</span>
+      <span class="value" id="forks"></span>
+    </div>
+    <div class="stat-row">
+      <span class="label">Open Issues</span>
+      <span class="value" id="openIssues"></span>
+    </div>
+    <div class="stat-row">
+      <span class="label">License</span>
+      <span class="value" id="license"></span>
+    </div>
+  </div>
+</div>
+
+
+<style>
+  .card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 1rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    border: 1px solid #eaecef;
+    max-width: 320px;
+    margin: auto;
+  }
+
+  .section-title {
+    font-size: 1rem;
+    color: #24292e;
+    margin: 0 0 .75rem 0;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .summary-list {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+  }
+
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    background: #f6f8fa;
+    border: 1px solid #eaecef;
+    border-radius: 8px;
+    padding: .6rem .8rem;
+    font-size: .85rem;
+  }
+
+  .stat-row .label {
+    color: #57606a;
+    font-weight: 500;
+    min-width: 100px; 
+    margin-right: 0.5rem;
+  }
+
+  .stat-row .value {
+    font-weight: 700;
+    color: #24292e;
+    word-break: break-word;
+  }
+</style>
