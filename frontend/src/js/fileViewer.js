@@ -113,8 +113,7 @@ function renderAnalysis(container, analysisObj, fullPayload) {
   const analysisHtml = `
     <div class="analysis-body">
       <h4>Analysis</h4>
-      <p>${escapeHtml(fileAnalysis.responsibilities || '')}</p>
-      <p>${escapeHtml(fileAnalysis.surprisingOrRiskyCode || fileAnalysis.surprising_or_risky || '')}</p>
+      <p>${escapeHtml(fileAnalysis || '')}</p>
     </div>
   `;
   const symbolsWrapper = document.createElement('div');
