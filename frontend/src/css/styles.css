@@ -42,7 +42,7 @@ header {
   font-weight: bold;
 }
 
-main {
+#code-section {
   flex: 1;
   display: grid;
   grid-template-columns: 25% 50% 25%;
@@ -416,10 +416,51 @@ section::-webkit-scrollbar-thumb:hover,
   transform: translateY(0);
 }
 
+#collapsible {
+ background-color: #eee;
+ color: #444;
+ cursor: pointer;
+ padding: 18px;
+ width: 100%;
+ border: none;
+ text-align: center;
+ outline: none;
+ font-size: 1.5em;
+ font-weight: bold;
+}
+
+.active, #collapsible:hover {
+ background-color: #ccc;
+}
+
+#overallAnalysis {
+ padding: 0 18px;
+ display: none;
+ overflow: hidden;
+ background-color: #f1f1f1;
+}
+
+#collapsible:after {
+ content: '\02795';
+ font-size: 13px;
+ color: white;
+ float: right;
+ margin-left: 5px;
+}
+
+#collapsible.active:after {
+ content: "\2796";
+}
+
+.hidden {
+    display: none;
+}
+
 .hovered {
   background: rgba(43, 139, 230, 0.04);
   cursor: pointer;
 }
+
 .loader {
   border: 4px solid #f3f3f3;
   border-top: 4px solid #3498db;
@@ -436,4 +477,33 @@ section::-webkit-scrollbar-thumb:hover,
   100% {
     transform: rotate(360deg);
   }
+}
+
+#no-repo-loaded-msg {
+  background: transparent;
+  justify-self: center;
+  align-content: center;
+  max-width: max-content;
+  height: 70vh;
+}
+
+#no-repo-loaded-msg h3{
+  text-align: center;
+  border: 4px solid #eee;
+  border-radius: 30px;
+  background: #fff;
+  padding: 1em;
+}
+
+hr {
+  border-top: 10px dashed #24292e;
+  width: 80vw;
+  background-color: white;
+}
+
+#file-summary-container {
+  border: 0.5em solid #24292e;
+  border-radius: 1em;
+  padding: 0.5em;
+  background: rgba(36, 41, 46, 0.15);
 }

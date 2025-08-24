@@ -29,8 +29,8 @@ export async function fetchAndRenderFiles(owner, repo, path, container) {
             await fetchAndRenderFiles(owner, repo, file.path, nestedUl);
           nestedUl.classList.toggle("hidden");
         });
-      } else if (file.type === "file") {
-        span.addEventListener("click", () => loadFile(file));
+      } else if (file.type === 'file') {
+        span.addEventListener('click', () => loadFile(repo, file));
         li.appendChild(span);
       }
       container.appendChild(li);
@@ -41,7 +41,7 @@ export async function fetchAndRenderFiles(owner, repo, path, container) {
   }
 }
 
-export async function loadFile(file) {
+export async function loadFile(repoName, file) {
   try {
     if (!file.download_url) {
       document.getElementById("fileContent").textContent =
@@ -100,6 +100,8 @@ export async function loadFile(file) {
         String(analysisErr.message || analysisErr)
       )}</p>`;
     }
+
+    await retrieveNonTechnicalSummary(repoName, file.path, normalizedContent)
   } catch (err) {
     console.error("Error loading file:", err);
     document.getElementById(
@@ -771,7 +773,7 @@ function wireSymbolInteractions(container) {
       }, 150);
     });
   });
-
+  
   const fileContentEl = document.getElementById("fileContent");
   if (fileContentEl) {
     fileContentEl.addEventListener("scroll", () => {
@@ -781,4 +783,21 @@ function wireSymbolInteractions(container) {
 
   window.addEventListener("scroll", hideSymbolTooltip, { passive: true });
   window.addEventListener("resize", hideSymbolTooltip);
+}
+
+async function retrieveNonTechnicalSummary(repoName, filePath, fileContents) {
+  const fileSummaryContent = document.getElementById('file-summary-content');
+
+  fileSummaryContent.innerHTML = '<p id="file-summary-content">Summarizing file...</p>';
+
+  const response = await fetch('http://localhost:4000/api/summary/file', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ repoName, filePath, fileContents })
+  });
+
+  const nonTechnicalSummary = await response.json();
+
+  fileSummaryContent.innerHTML = marked.parse(nonTechnicalSummary.summary);
+
 }
