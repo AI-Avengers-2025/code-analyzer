@@ -112,7 +112,7 @@ jobs:
                 listen [::]:80;
                 server_name $APP_DOMAIN;
                 
-                root /home/${{ vars.EC2_USER }}/application/frontend/src;
+                root /var/www/frontend;
                 index index.html;
 
                 # Proxy API requests to Node.js backend
@@ -160,14 +160,8 @@ jobs:
               pm2 start src/server.js --name backend-server
             fi
             pm2 save
-            
-            cd "$FRONTEND_APP_DIR"
 
-            if pm2 show frontend-server &> /dev/null; then
-              pm2 restart frontend-server
-            else
-              pm2 start "live-server --port=3000 --open=./src/index.html" --name frontend-server
-            fi
-            pm2 save
+            sudo mkdir -p /var/www/frontend
+            sudo cp -r /home/ec2-user/application/frontend/src/* /var/www/frontend/
 
             echo "Deployment complete."
