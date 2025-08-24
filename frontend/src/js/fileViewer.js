@@ -1,9 +1,10 @@
 import { showToast } from './toast.js';
+import { BASE_URL } from "../config.js";
 
 const DEBUG_HIGHLIGHT = (typeof window !== 'undefined' && window.DEBUG_HIGHLIGHT) || false;
 
 export async function fetchAndRenderFiles(owner, repo, path, container) {
-  const apiUrl = `http://localhost:4000/api/repo/${owner}/${repo}/${encodeURIComponent(path)}`;
+  const apiUrl = `${BASE_URL}/api/repo/${owner}/${repo}/${encodeURIComponent(path)}`;
   try {
     const res = await fetch(apiUrl);
     const files = await res.json();
