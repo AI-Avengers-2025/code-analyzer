@@ -1,9 +1,17 @@
 import fetch from "node-fetch";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const GITHUB_API = "https://api.github.com";
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
 export async function fetchRepoContents(owner, repo, path, githubToken = undefined) {
   const apiUrl = `${GITHUB_API}/repos/${owner}/${repo}/contents/${path}`;
+
+  if (!githubToken) {
+    githubToken = GITHUB_TOKEN;
+  }
 
   const headers = {
     "User-Agent": "Repo-Analyzer",
@@ -28,10 +36,21 @@ export async function fetchFileContent(url) {
   return response.text();
 }
 
-export async function fetchRepoSummary(owner, repo) {
-  const repoRes = await fetch(`${GITHUB_API}/repos/${owner}/${repo}`, {
-    headers: { "User-Agent": "Repo-Analyzer" },
-  });
+export async function fetchRepoSummary(owner, repo, githubToken = undefined) {
+  if (!githubToken) {
+    githubToken = GITHUB_TOKEN;
+  }
+
+  const headers = {
+    "User-Agent": "Repo-Analyzer",
+    Accept: "application/vnd.github.v3+json"
+  };
+
+  if (githubToken) {
+    headers.Authorization = `token ${githubToken}`;
+  }
+
+  const repoRes = await fetch(`${GITHUB_API}/repos/${owner}/${repo}`, {headers});
   if (!repoRes.ok)
     throw new Error(`GitHub repo info fetch failed: ${repoRes.status}`);
   const repoData = await repoRes.json();
