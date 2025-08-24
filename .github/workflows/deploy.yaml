@@ -1,0 +1,169 @@
+name: Deploy Application
+
+on:
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - "server/**"
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Copy files to EC2 with scp
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ vars.EC2_HOST }}
+          username: ${{ vars.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          source: "."
+          target: "/home/${{ vars.EC2_USER }}/application/"
+          rm: true
+
+      - name: Run remote commands on EC2 and Configure Nginx
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ vars.EC2_HOST }}
+          username: ${{ vars.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            APP_DOMAIN="${{ vars.APP_DOMAIN }}"
+            CERTBOT_EMAIL="${{ secrets.CERTBOT_EMAIL }}"
+            APP_DIR="/home/${{ vars.EC2_USER }}/application/backend"
+            mkdir -p "$APP_DIR"
+            cd "$APP_DIR"
+            echo "--- Deploying to EC2: $(pwd) ---"
+
+            # Install NVM and Node.js 22.13.0
+            export NVM_DIR="$HOME/.nvm"
+            if [ ! -d "$NVM_DIR" ]; then
+              echo "Installing NVM..."
+              curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+            fi
+            source "$NVM_DIR/nvm.sh"
+
+            if ! node -v | grep -q "v22.13.0"; then
+              echo "Installing Node.js v22.13.0..."
+              nvm install 22.13.0
+              nvm alias default 22.13.0
+              nvm use 22.13.0
+            fi
+
+            # Ensure PM2 is installed
+            if ! command -v pm2 &> /dev/null; then
+              echo "Installing PM2..."
+              npm install -g pm2
+            fi
+
+            echo "Writing environment variables to .env..."
+            cat <<EOF > "$APP_DIR/.env"
+            NODE_ENV=production
+            PORT=4000
+            ENABLE_GEMINI=true
+            GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}
+            GOOGLE_APPLICATION_CREDENTIALS=null
+            DEBUG_DOTENV=false
+            EOF
+
+            # Install app dependencies
+            echo "Installing app dependencies..."
+            npm install
+
+            # Build the app
+            echo "Building the app..."
+            npm run build
+
+            # --- NGINX SETUP ---
+            echo "--- Configuring Nginx ---"
+            if ! command -v nginx &> /dev/null; then
+              echo "Installing Nginx..."
+              sudo yum install -y nginx
+              sudo systemctl enable nginx
+            fi
+
+            echo "Configuring 'server_names_hash_bucket_size'..."
+            if ! grep -q "server_names_hash_bucket_size" /etc/nginx/nginx.conf; then
+              sudo sed -i '/http {/a \    server_names_hash_bucket_size 128;' /etc/nginx/nginx.conf
+            else
+              sudo sed -i 's/^\(\s*\)#\?\s*server_names_hash_bucket_size.*/\1server_names_hash_bucket_size 128;/' /etc/nginx/nginx.conf
+            fi
+
+            NGINX_CONF="/etc/nginx/conf.d/cb-api.conf"
+            APP_DOMAIN="${{ vars.APP_DOMAIN }}"
+            echo "Creating Nginx config file: $NGINX_CONF"
+            sudo tee "$NGINX_CONF" > /dev/null <<EOF
+            server {
+                listen 80;
+                listen [::]:80;
+                server_name $APP_DOMAIN;
+
+                # Proxy API requests to Node.js backend
+                location /api {
+                    proxy_pass http://localhost:4000;
+                    proxy_http_version 1.1;
+                    proxy_set_header Upgrade \$http_upgrade;
+                    proxy_set_header Connection "upgrade";
+                    proxy_set_header Host \$host;
+                    proxy_cache_bypass \$http_upgrade;
+                    proxy_set_header X-Real-IP \$remote_addr;
+                    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+                    proxy_set_header X-Forwarded-Proto \$scheme;
+                }
+
+                location / {
+                    proxy_pass http://localhost:3000;
+                    proxy_http_version 1.1;
+                    proxy_set_header Upgrade \$http_upgrade;
+                    proxy_set_header Connection "upgrade";
+                    proxy_set_header Host \$host;
+                    proxy_cache_bypass \$http_upgrade;
+                    proxy_set_header X-Real-IP \$remote_addr;
+                    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+                    proxy_set_header X-Forwarded-Proto \$scheme;
+                }
+            }
+            EOF
+
+            echo "Testing and restarting Nginx..."
+            sudo nginx -t && sudo systemctl restart nginx || { echo "Nginx configuration failed!"; exit 1; }
+
+            echo "Installing Certbot and requesting SSL certificate..."
+            if ! command -v certbot &> /dev/null; then
+              sudo yum install -y epel-release
+              sudo yum install -y certbot python3-certbot-nginx
+            fi
+
+            sudo certbot --nginx --non-interactive --agree-tos --email "$CERTBOT_EMAIL" -d "$APP_DOMAIN"
+
+            echo "Reloading Nginx with SSL..."
+            sudo nginx -t && sudo systemctl reload nginx
+
+            # Copy all files except src/, node_modules/, and dist
+            echo "Copying runtime files to dist/ ..."
+            mkdir -p dist
+            rsync -av --exclude='src' --exclude='node_modules' --exclude='dist' ./ dist/
+
+            # Start/restart ai-avengers-server with PM2
+            echo "Starting/Restarting ai-avengers-server with PM2..."
+            cd dist
+            export NODE_ENV=production 
+            if pm2 show ai-avengers-server &> /dev/null; then
+              pm2 restart ai-avengers-server
+            else
+              pm2 start app.js --name ai-avengers-server
+            fi
+            pm2 save
+
+            echo "Deployment complete."
