@@ -143,8 +143,10 @@ export const getFileSummary = async (req, res) => {
 
       res.json({ summary: summaryObject.summary });
     }
+    else {
+      res.json({ summary: existingSummary?.summary });
+    }
 
-    res.json({ summary: existingSummary.summary });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
