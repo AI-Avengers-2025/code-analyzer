@@ -58,6 +58,9 @@ document.getElementById("goToCodeBtn").addEventListener("click", async () => {
   `;
 
   document.getElementById("no-repo-loaded-msg").classList.add('hidden');
+  document.getElementById("collapsible").classList.add('hidden');
+  document.getElementById('overallAnalysis').classList.add('hidden');
+  document.getElementById('analysisContent').classList.add('hidden');
 
   try {
     await nonTechnicalSummary(repoUrl, githubToken);
@@ -73,7 +76,6 @@ document.getElementById("goToCodeBtn").addEventListener("click", async () => {
     }
 
     document.getElementById('repoSummary').classList.remove('hidden');
-    document.getElementsByTagName('hr')[0].classList.remove('hidden');
     document.getElementsByClassName('code-section')[0].classList.remove('hidden');
     document.getElementById('explorer').classList.remove('hidden');
     document.getElementById('viewer').classList.remove('hidden');
@@ -183,19 +185,48 @@ function displayFinalSummary(summary) {
 
   collapsibleButton.classList.remove('hidden');
 
-  collapsibleButton.addEventListener("click", function() {
-    this.classList.toggle("active");
-    if (overallAnalysis.style.display === "block") {
-      overallAnalysis.style.display = "none";
-    } else {
-      document.getElementById('progress-container').classList.add('hidden');
-      overallAnalysis.style.display = "block";
-      overallAnalysis.classList.remove('hidden');
-      overallAnalysisContent.classList.remove('hidden');
-    }
-  });
-
   overallAnalysisContent.innerHTML = marked.parse(summary);
-
 }
 
+function addOverallSummaryCollapsibleEventListener() {
+const overallAnalysis = document.getElementById('overallAnalysis');
+const overallAnalysisContent = document.getElementById('analysisContent');
+
+const collapsibleButton = document.getElementById("collapsible");
+
+collapsibleButton.addEventListener("click", function() {
+  this.classList.toggle("active");
+  if (overallAnalysis.style.display === "block") {
+    overallAnalysis.style.display = "none";
+  } else {
+    document.getElementById('progress-container').classList.add('hidden');
+    overallAnalysis.style.display = "block";
+    overallAnalysis.classList.remove('hidden');
+    overallAnalysisContent.classList.remove('hidden');
+  }
+});
+}
+
+
+function addFileSummaryCollapsibleEventListener() {
+const button = document.getElementById('collapsible-btn');
+const content = document.getElementsByClassName('collapsible-text-container')[0];
+const buttonText = document.getElementById('button-text');
+
+button.addEventListener('click', () => {
+  const isExpanded = content.classList.contains('show-all');
+
+  if (isExpanded) {
+    content.classList.remove('show-all');
+    button.classList.remove('active');
+    buttonText.textContent = 'Read More';
+  } else {
+    content.classList.add('show-all');
+    button.classList.add('active');
+    buttonText.textContent = 'Read Less';
+  }
+});
+}
+
+addOverallSummaryCollapsibleEventListener();
+addFileSummaryCollapsibleEventListener();

@@ -43,6 +43,10 @@ export async function fetchAndRenderFiles(owner, repo, path, container, githubTo
 }
 
 export async function loadFile(repoName, file) {
+  const fileSummaryContent = document.getElementById('file-summary-content');
+
+  fileSummaryContent.innerHTML = '<p id="file-summary-content">Summarizing file...</p><span class="spinner" aria-hidden="true"></span></p>';
+
   try {
     if (!file.download_url) {
       document.getElementById("fileContent").textContent =
@@ -771,8 +775,6 @@ function wireSymbolInteractions(container) {
 
 async function retrieveNonTechnicalSummary(repoName, filePath, fileContents) {
   const fileSummaryContent = document.getElementById('file-summary-content');
-
-  fileSummaryContent.innerHTML = '<p id="file-summary-content">Summarizing file...</p>';
 
   const response = await fetch(`${BASE_URL}/api/summary/file`, {
     method: 'POST',
