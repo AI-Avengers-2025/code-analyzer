@@ -13,6 +13,21 @@
       <button id="loadRepoBtn">Load Repository</button>
       <button id="goToCodeBtn">Go to Code Analysis</button>
     </div>
+    <div id="progress-container" class="hidden">
+      <p id="status-message" class="text-center text-gray-700 font-semibold mb-2"></p>
+      <div class="w-full bg-gray-200 rounded-full h-4 relative overflow-hidden shadow-inner">
+        <div
+                id="progress-bar"
+                class="bg-blue-500 h-full text-center text-xs text-white transition-all duration-500 ease-out"
+                style="width: 0%;"
+        ></div>
+      </div>
+      <p id="progress-text" class="text-center text-gray-500 mt-2 text-sm"></p>
+    </div>
+    <button type="button" id="collapsible" class="hidden">Overall Repo Analysis</button>
+    <section id="overallAnalysis" class="hidden">
+      <p id="analysisContent"></p>
+    </section>
   </header>
 
   <main>
@@ -21,13 +36,10 @@
       <div id="summaryContent">Paste a GitHub repo URL and click "Load Repository".</div>
     </section>
 
-    <section id="overallAnalysis">
-      <h2>Overall Analysis</h2>
-      <div id="analysisContent"></div>
-    </section>
   </main>
 
   <script type="module" src="./js/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <div id="toastContainer"></div>
 </body>
 </html>

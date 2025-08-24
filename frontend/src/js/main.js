@@ -53,6 +53,8 @@ document.getElementById("loadRepoBtn").addEventListener("click", async () => {
   `;
 
   try {
+    await nonTechnicalSummary(repoUrl);
+
     const res = await fetch(`${BASE_URL}/api/repo/${owner}/${repo}/summary`);
     const data = await res.json();
 
@@ -102,3 +104,82 @@ document.getElementById("loadRepoBtn").addEventListener("click", async () => {
 document.getElementById("goToCodeBtn").addEventListener("click", () => {
   window.location.href = "./pages/codeView.html";
 });
+
+async function nonTechnicalSummary(repoUrl) {
+
+  const githubUrl = repoUrl.replace(".git", "");
+
+  document.getElementById('progress-container').classList.remove('hidden');
+
+  const endpointUrl = `${BASE_URL}/api/summary?githubUrl=${encodeURIComponent(githubUrl)}`;
+
+  const eventSource = new EventSource(endpointUrl);
+
+  eventSource.onopen = (event) => {
+    console.log("Connection to server opened.");
+    updateUIStatus('Starting summarization...');
+  };
+
+  eventSource.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+
+    if (data.status === 'progress') {
+      console.log(`Progress: ${data.message}`);
+      updateUIProgress(data.current, data.total);
+    } else if (data.status === 'generating_final_summary' || data.status === 'started') {
+      console.log(data.message);
+      updateUIStatus(data.message);
+    } else if (data.status === 'complete') {
+      console.log('Final Summary:', data.finalSummary);
+      updateUIStatus('Summarization complete!');
+      displayFinalSummary(data.finalSummary);
+      eventSource.close();
+    }
+  };
+
+  eventSource.onerror = (error) => {
+    console.error('EventSource failed:', error);
+    updateUIStatus('An error occurred during summarization.');
+    eventSource.close();
+  };
+}
+
+function updateUIStatus(message) {
+  document.getElementById('status-message').textContent = message;
+}
+
+function updateUIProgress(current, total) {
+  const progressBar = document.getElementById('progress-bar');
+  const progressText = document.getElementById('progress-text');
+  const percentage = (current / total) * 100;
+
+  progressBar.style.width = `${percentage}%`;
+  progressText.textContent = `${current}/${total} files processed`;
+}
+
+function displayFinalSummary(summary) {
+
+  const overallAnalysis = document.getElementById('overallAnalysis');
+  const overallAnalysisContent = document.getElementById('analysisContent');
+
+
+  const collapsibleButton = document.getElementById("collapsible");
+
+  collapsibleButton.classList.remove('hidden');
+
+  collapsibleButton.addEventListener("click", function() {
+    document.getElementById('progress-container').classList.add('hidden');
+    this.classList.toggle("active");
+    if (overallAnalysis.style.display === "block") {
+      overallAnalysis.style.display = "none";
+    } else {
+      overallAnalysis.style.display = "block";
+      overallAnalysis.classList.remove('hidden');
+      overallAnalysisContent.classList.remove('hidden');
+    }
+  });
+
+  overallAnalysisContent.innerHTML = marked.parse(summary);
+
+}
+
