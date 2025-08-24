@@ -1,7 +1,11 @@
 import {readExistingSummaries, saveSummaryToFile, summarizeRepo} from "../services/summaryService.js";
 import {getContentsOfRepo} from "../api/github.js";
 import {sendToGemini} from "../api/gemini.js";
+import dotenv from "dotenv";
 
+dotenv.config();
+
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
 const fileLevelPrompt = `
     I want to create a story of the repo for non-technical people to easily understand.
@@ -36,14 +40,18 @@ export const streamSummariesToFrontend = async(req, res) => {
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
 
-  const { githubUrl, githubToken} = req.query;
+  let { githubUrl, githubToken} = req.query;
+
+  if (!githubToken) {
+    githubToken = GITHUB_TOKEN;
+  }
 
   const repoPath = githubUrl.replace('https://github.com/', '');
   const [owner, repo] = repoPath.split('/');
 
   const startingMessage = {
     status: 'started',
-    message: `Creating summaries for ${repo}`
+    message: `Generating overall summary for ${repo}`
   };
   res.write('data: ' + JSON.stringify(startingMessage) + '\n\n');
 
@@ -146,7 +154,6 @@ export const getFileSummary = async (req, res) => {
     else {
       res.json({ summary: existingSummary?.summary });
     }
-
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

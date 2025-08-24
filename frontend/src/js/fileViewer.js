@@ -4,8 +4,10 @@ import { BASE_URL } from "../config.js";
 const DEBUG_HIGHLIGHT =
   (typeof window !== "undefined" && window.DEBUG_HIGHLIGHT) || false;
 
-export async function fetchAndRenderFiles(owner, repo, path, container) {
-  const apiUrl = `${BASE_URL}/api/repo/${owner}/${repo}/${encodeURIComponent(path)}`;
+export async function fetchAndRenderFiles(owner, repo, path, container, githubToken) {
+  const apiUrl = `http://localhost:4000/api/repo/${owner}/${repo}/${encodeURIComponent(
+    path
+  )}${githubToken ? `?githubToken=${githubToken}`: ''}`;
   try {
     const res = await fetch(apiUrl);
     const files = await res.json();
@@ -25,7 +27,7 @@ export async function fetchAndRenderFiles(owner, repo, path, container) {
         span.addEventListener("click", async (e) => {
           e.stopPropagation();
           if (nestedUl.childElementCount === 0)
-            await fetchAndRenderFiles(owner, repo, file.path, nestedUl);
+            await fetchAndRenderFiles(owner, repo, file.path, nestedUl, githubToken);
           nestedUl.classList.toggle("hidden");
         });
       } else if (file.type === 'file') {

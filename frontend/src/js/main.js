@@ -35,6 +35,8 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 document.getElementById("goToCodeBtn").addEventListener("click", async () => {
   const repoUrl = document.getElementById("repoUrl").value.trim();
+  const githubToken = document.getElementById("github-token").value.trim();
+
   if (!repoUrl) return showToast("Please enter a GitHub repository URL");
 
   const match = repoUrl.match(/github\.com\/([^/]+)\/([^/]+)/);
@@ -46,7 +48,7 @@ document.getElementById("goToCodeBtn").addEventListener("click", async () => {
   sessionStorage.setItem("repoOwner", owner);
   sessionStorage.setItem("repoName", repo);
 
-  document.getElementById('code-section').classList.remove('hidden');
+  document.getElementsByClassName('code-section')[0].classList.remove('hidden');
 
   document.getElementById("summaryContent").innerHTML = `
     <div style="display:flex; align-items:center; justify-content:center; padding:20px;">
@@ -58,9 +60,9 @@ document.getElementById("goToCodeBtn").addEventListener("click", async () => {
   document.getElementById("no-repo-loaded-msg").classList.add('hidden');
 
   try {
-    await nonTechnicalSummary(repoUrl);
+    await nonTechnicalSummary(repoUrl, githubToken);
 
-    const res = await fetch(`${BASE_URL}/api/repo/${owner}/${repo}/summary`);
+    const res = await fetch(`${BASE_URL}/api/repo/${owner}/${repo}/summary${githubToken ? `?githubToken=${githubToken}`: ''}`);
     const data = await res.json();
 
     if (data.error) {
@@ -71,7 +73,8 @@ document.getElementById("goToCodeBtn").addEventListener("click", async () => {
     }
 
     document.getElementById('repoSummary').classList.remove('hidden');
-    document.getElementById('code-section').classList.remove('hidden');
+    document.getElementsByTagName('hr')[0].classList.remove('hidden');
+    document.getElementsByClassName('code-section')[0].classList.remove('hidden');
     document.getElementById('explorer').classList.remove('hidden');
     document.getElementById('viewer').classList.remove('hidden');
     document.getElementById('analysis').classList.remove('hidden');
@@ -110,7 +113,7 @@ document.getElementById("goToCodeBtn").addEventListener("click", async () => {
     const fileContainer = document.getElementById("fileList");
 
     if (owner && repo) {
-      await loadRepo(owner, repo, fileContainer);
+      await loadRepo(owner, repo, fileContainer, githubToken);
     }
   } catch (err) {
     showToast("Failed to fetch repository summary");
@@ -118,12 +121,12 @@ document.getElementById("goToCodeBtn").addEventListener("click", async () => {
   }
 });
 
-async function nonTechnicalSummary(repoUrl) {
+async function nonTechnicalSummary(repoUrl, githubToken) {
   const githubUrl = repoUrl.replace(".git", "");
 
   document.getElementById('progress-container').classList.remove('hidden');
 
-  const endpointUrl = `${BASE_URL}/api/summary?githubUrl=${encodeURIComponent(githubUrl)}`;
+  const endpointUrl = `${BASE_URL}/api/summary?githubUrl=${encodeURIComponent(githubUrl)}${githubToken ? `&githubToken=${githubToken}`: ''}`;
 
   const eventSource = new EventSource(endpointUrl);
 
@@ -185,6 +188,7 @@ function displayFinalSummary(summary) {
     if (overallAnalysis.style.display === "block") {
       overallAnalysis.style.display = "none";
     } else {
+      document.getElementById('progress-container').classList.add('hidden');
       overallAnalysis.style.display = "block";
       overallAnalysis.classList.remove('hidden');
       overallAnalysisContent.classList.remove('hidden');
