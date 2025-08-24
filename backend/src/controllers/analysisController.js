@@ -105,7 +105,7 @@ function prepareGeminiPayload({
     contents: [{ text: prompt }],
     generationConfig: {
       temperature: 0.1,
-      maxOutputTokens: 2048, 
+      maxOutputTokens: 1000000, 
     },
   };
 
@@ -150,11 +150,14 @@ async function analyzeFile(req, res) {
         (Array.isArray(response?.candidates) &&
           response.candidates[0]?.content) ||
         JSON.stringify(response);
-      console.log(text);
       let _processedText = `${text}`.trim();
       const startIndex = _processedText.indexOf("{");
       if (startIndex > 0) {
         _processedText = _processedText.slice(startIndex);
+      }
+      const endIndex = _processedText.lastIndexOf("}");
+      if (endIndex > 0) {
+        _processedText = _processedText.slice(0, endIndex + 1);
       }
       return res.json({ analysis: JSON.parse(_processedText) });
     } catch (err) {
